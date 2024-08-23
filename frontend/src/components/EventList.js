@@ -7,6 +7,17 @@ const EventList = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [location, setLocation] = useState('');
+  const [filters, setFilters] = useState({
+    eventName: '',
+    artistIds: '',
+    venueIds: '',
+    startDate: '',
+    endDate: '',
+    festivalInd: false,
+    livestreamInd: false,
+    includeElectronicGenreInd: true,
+    includeOtherGenreInd: false,
+  });
 
   useEffect(() => {
     fetchUserLocationEvents();
@@ -24,17 +35,16 @@ const EventList = () => {
           Authorization: `Bearer ${spotifyAccessToken}`,
         },
       });
-      return response.data.artists.items[0]?.images[0]?.url || '/default-artist.jpg';
+      return response.data.artists.items[0]?.images[0]?.url || '/raveplaceholder.jpg';
     } catch (err) {
       if (err.response && err.response.status === 429) {
-        // If rate-limited, wait and retry
         const retryAfter = err.response.headers['retry-after'] || 1;
         console.warn(`Rate limited, retrying after ${retryAfter} seconds`);
         await new Promise(resolve => setTimeout(resolve, retryAfter * 1000));
         return fetchArtistImage(artistNames, spotifyAccessToken);
       }
       console.error('Error fetching artist image:', err);
-      return '/default-artist.jpg';
+      return '/raveplaceholder.jpg';
     }
   };
 
@@ -46,7 +56,6 @@ const EventList = () => {
       const position = await getUserLocation();
       const { latitude, longitude } = position;
 
-      // Fetch state using Google Geocoding API
       const geoResponse = await axios.get(
         `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${process.env.REACT_APP_GOOGLE_API_KEY}`
       );
@@ -59,23 +68,29 @@ const EventList = () => {
         const state = stateComponent?.long_name;
 
         if (state) {
-          // Fetch Spotify Access Token
           const spotifyTokenResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/spotify/token`);
           const spotifyAccessToken = spotifyTokenResponse.data.accessToken;
 
-          // Fetch events from EDM Train API
           const response = await axios.get('https://edmtrain.com/api/events', {
             params: {
               latitude,
               longitude,
               state,
               client: process.env.REACT_APP_EDM_TRAIN_API_KEY,
+              eventName: filters.eventName,
+              artistIds: filters.artistIds,
+              venueIds: filters.venueIds,
+              startDate: filters.startDate,
+              endDate: filters.endDate,
+              festivalInd: filters.festivalInd,
+              livestreamInd: filters.livestreamInd,
+              includeElectronicGenreInd: filters.includeElectronicGenreInd,
+              includeOtherGenreInd: filters.includeOtherGenreInd,
             },
           });
 
           const eventsData = response.data.data || [];
 
-          // Fetch Spotify artist images and combine with event data
           const eventsWithArtists = await Promise.all(eventsData.map(async (event) => {
             if (event.artistList && event.artistList.length > 0) {
               const artistNames = event.artistList.map(artist => artist.name).join(',');
@@ -104,10 +119,77 @@ const EventList = () => {
     }
   };
 
+  const handleFilterChange = (e) => {
+    setFilters({ ...filters, [e.target.name]: e.target.value });
+  };
+
   return (
     <div className="container mx-auto mt-8 p-6 bg-gray-100 rounded-lg shadow-lg">
       <h1 className="text-3xl font-bold text-gray-800 mb-6">Events</h1>
-      {/* UI for events */}
+
+      <div className="mb-4">
+        <input
+          type="text"
+          name="eventName"
+          placeholder="Event Name"
+          value={filters.eventName}
+          onChange={handleFilterChange}
+          className="mr-2 p-2 border"
+        />
+        <input
+          type="text"
+          name="artistIds"
+          placeholder="Artist IDs"
+          value={filters.artistIds}
+          onChange={handleFilterChange}
+          className="mr-2 p-2 border"
+        />
+        <input
+          type="text"
+          name="venueIds"
+          placeholder="Venue IDs"
+          value={filters.venueIds}
+          onChange={handleFilterChange}
+          className="mr-2 p-2 border"
+        />
+        <input
+          type="date"
+          name="startDate"
+          placeholder="Start Date"
+          value={filters.startDate}
+          onChange={handleFilterChange}
+          className="mr-2 p-2 border"
+        />
+        <input
+          type="date"
+          name="endDate"
+          placeholder="End Date"
+          value={filters.endDate}
+          onChange={handleFilterChange}
+          className="mr-2 p-2 border"
+        />
+        <label className="mr-2">
+          <input
+            type="checkbox"
+            name="festivalInd"
+            checked={filters.festivalInd}
+            onChange={() => setFilters({ ...filters, festivalInd: !filters.festivalInd })}
+            className="mr-1"
+          />
+          Festivals Only
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            name="livestreamInd"
+            checked={filters.livestreamInd}
+            onChange={() => setFilters({ ...filters, livestreamInd: !filters.livestreamInd })}
+            className="mr-1"
+          />
+          Live Streams Only
+        </label>
+      </div>
+
       {loading && <p className="text-center text-gray-500">Loading events...</p>}
       {error && <div className="text-red-500 text-center">{error}</div>}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -115,7 +197,7 @@ const EventList = () => {
           events.map((event) => (
             <div key={event.id} className="bg-white rounded-lg shadow-md overflow-hidden">
               <img
-                src={event.artistImage || '/default-event.jpg'}
+                src={event.artistImage || '/raveplaceholder.jpg'}
                 alt={event.name || 'Event'}
                 className="w-full h-48 object-cover"
               />
