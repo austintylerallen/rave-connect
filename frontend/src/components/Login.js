@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -11,9 +12,18 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('/api/auth/login', { email, password });
-      localStorage.setItem('token', response.data.token);
-      navigate('/'); // Redirect to homepage or dashboard after login
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/login`, {
+        email,
+        password,
+      });
+
+      const token = response.data.token;
+      const user = jwtDecode(token).user;
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+
+      // Redirect to the timeline page after successful login
+      navigate(`/`);
     } catch (error) {
       setError('Invalid credentials');
       console.error('Error logging in:', error);
@@ -53,17 +63,6 @@ const Login = () => {
             Login
           </button>
         </form>
-        <div className="mt-6 text-center">
-          <Link to="/forgot-password" className="text-white hover:text-lightPurple hover:underline">
-            Forgot Password?
-          </Link>
-        </div>
-        <div className="mt-4 text-center text-white">
-          Don't have an account?{' '}
-          <Link to="/register" className="text-purple hover:text-lightPurple hover:underline">
-            Register here
-          </Link>
-        </div>
       </div>
     </div>
   );

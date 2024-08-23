@@ -5,18 +5,21 @@ const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  bio: { type: String, default: '' },
-  favoriteGenres: { type: [String], default: [] },
-  profilePicture: { type: String, default: 'default.jpg' },
+  bio: { type: String },
+  favoriteGenres: { type: [String] },
+  profilePicture: { type: String },
+  followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   resetPasswordToken: { type: String },
   resetPasswordExpires: { type: Date },
-  date: { type: Date, default: Date.now },
 });
 
-userSchema.pre('save', async function(next) {
+// Middleware to hash the password before saving
+userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
   this.password = await bcrypt.hash(this.password, 10);
   next();
 });
 
-module.exports = mongoose.model('User', userSchema);
+const User = mongoose.model('User', userSchema);
+module.exports = User;

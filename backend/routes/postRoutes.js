@@ -1,3 +1,4 @@
+// Backend - routes/postRoutes.js
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
@@ -6,8 +7,14 @@ const Post = require('../models/Post');
 // Create a new post
 router.post('/', auth, async (req, res) => {
   try {
+    const { text } = req.body;
+
+    if (!text) {
+      return res.status(400).json({ msg: 'Text is required' });
+    }
+
     const newPost = new Post({
-      text: req.body.text,
+      text,
       user: req.user.id,
     });
 
@@ -30,37 +37,48 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Like a post
-router.put('/like/:id', auth, async (req, res) => {
+// Update a post
+router.put('/:id', auth, async (req, res) => {
   try {
+    const { text } = req.body;
     const post = await Post.findById(req.params.id);
 
-    if (!post.likes.includes(req.user.id)) {
-      post.likes.unshift(req.user.id);
-      await post.save();
-      return res.json(post.likes);
+    if (!post) {
+      return res.status(404).json({ msg: 'Post not found' });
     }
 
-    res.status(400).json({ msg: 'Post already liked' });
+    // Check if the user is the owner of the post
+    if (post.user.toString() !== req.user.id) {
+      return res.status(401).json({ msg: 'User not authorized' });
+    }
+
+    post.text = text;
+    await post.save();
+
+    res.json(post);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server error');
   }
 });
 
-// Comment on a post
-router.post('/comment/:id', auth, async (req, res) => {
+// Delete a post
+router.delete('/:id', auth, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
 
-    const newComment = {
-      text: req.body.text,
-      user: req.user.id,
-    };
+    if (!post) {
+      return res.status(404).json({ msg: 'Post not found' });
+    }
 
-    post.comments.unshift(newComment);
-    await post.save();
-    res.json(post.comments);
+    // Check if the user deleting the post is the one who created it
+    if (post.user.toString() !== req.user.id) {
+      return res.status(401).json({ msg: 'User not authorized' });
+    }
+
+    await post.deleteOne();  // This is the correct method to delete a post document
+
+    res.json({ msg: 'Post removed' });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server error');
