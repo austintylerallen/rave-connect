@@ -35,7 +35,6 @@ router.put('/:id', auth, async (req, res) => {
   }
 });
 
-
 // Follow a user
 router.post('/follow/:id', auth, async (req, res) => {
   try {
@@ -79,4 +78,3 @@ router.post('/unfollow/:id', auth, async (req, res) => {
 });
 
 module.exports = router;
-
