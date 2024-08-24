@@ -1,0 +1,99 @@
+/* Timeline.css */
+
+.post-form {
+    display: flex;
+    flex-direction: row;
+    border: 1px solid #e1e8ed;
+    border-radius: 16px;
+    padding: 16px;
+    background-color: white;
+  }
+  
+  .post-form-header {
+    display: flex;
+    align-items: flex-start;
+  }
+  
+  .textarea-with-thumbnail {
+    margin-right: 104px; /* Adjust based on the size of the thumbnail */
+  }
+  
+  .event-thumbnail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .event-thumbnail img {
+    border-radius: 8px;
+    width: 96px;
+    height: 96px;
+    object-fit: cover;
+  }
+  
+  .post-form-textarea {
+    resize: none;
+    margin-top: 8px;
+    border-radius: 16px;
+    padding: 10px;
+  }
+  
+  .event-name {
+    margin-top: 8px;
+    font-weight: bold;
+    text-align: center;
+  }
+  
+  .post-form-buttons {
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .select-event-button {
+    padding: 8px 12px;
+    background-color: #e1e8ed;
+    border-radius: 9999px;
+    color: #14171a;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .select-event-button:hover {
+    background-color: #d1d8de;
+  }
+  
+  .post-form-submit-button {
+    background-color: #1da1f2;
+    border-radius: 9999px;
+    font-weight: bold;
+    padding: 8px 16px;
+    color: white;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .post-form-submit-button:hover {
+    background-color: #0d95e8;
+  }
+  
+  .post-form-cancel-button {
+    background-color: #657786;
+    border-radius: 9999px;
+    font-weight: bold;
+    padding: 8px 16px;
+    color: white;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .post-form-cancel-button:hover {
+    background-color: #555;
+  }
+  

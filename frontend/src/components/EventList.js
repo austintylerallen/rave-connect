@@ -21,7 +21,7 @@ const EventList = () => {
 
   useEffect(() => {
     fetchUserLocationEvents();
-  }, []);
+  }, [filters]);
 
   const fetchArtistImage = async (artistNames, spotifyAccessToken) => {
     try {
@@ -77,15 +77,7 @@ const EventList = () => {
               longitude,
               state,
               client: process.env.REACT_APP_EDM_TRAIN_API_KEY,
-              eventName: filters.eventName,
-              artistIds: filters.artistIds,
-              venueIds: filters.venueIds,
-              startDate: filters.startDate,
-              endDate: filters.endDate,
-              festivalInd: filters.festivalInd,
-              livestreamInd: filters.livestreamInd,
-              includeElectronicGenreInd: filters.includeElectronicGenreInd,
-              includeOtherGenreInd: filters.includeOtherGenreInd,
+              ...filters,
             },
           });
 
@@ -128,67 +120,68 @@ const EventList = () => {
       <h1 className="text-3xl font-bold text-gray-800 mb-6">Events</h1>
 
       <div className="mb-4">
-        <input
-          type="text"
-          name="eventName"
-          placeholder="Event Name"
-          value={filters.eventName}
-          onChange={handleFilterChange}
-          className="mr-2 p-2 border"
-        />
-        <input
-          type="text"
-          name="artistIds"
-          placeholder="Artist IDs"
-          value={filters.artistIds}
-          onChange={handleFilterChange}
-          className="mr-2 p-2 border"
-        />
-        <input
-          type="text"
-          name="venueIds"
-          placeholder="Venue IDs"
-          value={filters.venueIds}
-          onChange={handleFilterChange}
-          className="mr-2 p-2 border"
-        />
-        <input
-          type="date"
-          name="startDate"
-          placeholder="Start Date"
-          value={filters.startDate}
-          onChange={handleFilterChange}
-          className="mr-2 p-2 border"
-        />
-        <input
-          type="date"
-          name="endDate"
-          placeholder="End Date"
-          value={filters.endDate}
-          onChange={handleFilterChange}
-          className="mr-2 p-2 border"
-        />
-        <label className="mr-2">
-          <input
-            type="checkbox"
-            name="festivalInd"
-            checked={filters.festivalInd}
-            onChange={() => setFilters({ ...filters, festivalInd: !filters.festivalInd })}
-            className="mr-1"
-          />
-          Festivals Only
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            name="livestreamInd"
-            checked={filters.livestreamInd}
-            onChange={() => setFilters({ ...filters, livestreamInd: !filters.livestreamInd })}
-            className="mr-1"
-          />
-          Live Streams Only
-        </label>
-      </div>
+  <input
+    type="text"
+    name="eventName"
+    placeholder="Event Name"
+    value={filters.eventName}
+    onChange={handleFilterChange}
+    className="mr-2 p-2 border text-gray-800"
+  />
+  <input
+    type="text"
+    name="artistIds"
+    placeholder="Artist IDs"
+    value={filters.artistIds}
+    onChange={handleFilterChange}
+    className="mr-2 p-2 border text-gray-800"
+  />
+  <input
+    type="text"
+    name="venueIds"
+    placeholder="Venue IDs"
+    value={filters.venueIds}
+    onChange={handleFilterChange}
+    className="mr-2 p-2 border text-gray-800"
+  />
+  <input
+    type="date"
+    name="startDate"
+    placeholder="Start Date"
+    value={filters.startDate}
+    onChange={handleFilterChange}
+    className="mr-2 p-2 border text-gray-800"
+  />
+  <input
+    type="date"
+    name="endDate"
+    placeholder="End Date"
+    value={filters.endDate}
+    onChange={handleFilterChange}
+    className="mr-2 p-2 border text-gray-800"
+  />
+  <label className="mr-2 text-gray-800">
+    <input
+      type="checkbox"
+      name="festivalInd"
+      checked={filters.festivalInd}
+      onChange={() => setFilters({ ...filters, festivalInd: !filters.festivalInd })}
+      className="mr-1"
+    />
+    Festivals Only
+  </label>
+  <label className="text-gray-800">
+    <input
+      type="checkbox"
+      name="livestreamInd"
+      checked={filters.livestreamInd}
+      onChange={() => setFilters({ ...filters, livestreamInd: !filters.livestreamInd })}
+      className="mr-1"
+    />
+    Live Streams Only
+  </label>
+</div>
+
 
       {loading && <p className="text-center text-gray-500">Loading events...</p>}
       {error && <div className="text-red-500 text-center">{error}</div>}
@@ -198,12 +191,12 @@ const EventList = () => {
             <div key={event.id} className="bg-white rounded-lg shadow-md overflow-hidden">
               <img
                 src={event.artistImage || '/raveplaceholder.jpg'}
-                alt={event.name || 'Event'}
+                alt={event.eventName || 'Event'}
                 className="w-full h-48 object-cover"
               />
               <div className="p-4">
                 <h2 className="text-xl font-semibold text-gray-800">
-                  {event.name || 'Unnamed Event'}
+                  {event.eventName || event.artistList?.map(artist => artist.name).join(', ') || 'Unnamed Event'}
                 </h2>
                 <p className="text-gray-600">
                   {event.venue?.name || 'Unknown Venue'}, {event.venue?.location || 'Unknown Location'}

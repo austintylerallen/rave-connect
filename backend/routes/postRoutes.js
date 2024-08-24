@@ -7,7 +7,7 @@ const Post = require('../models/Post');
 // Create a new post
 router.post('/', auth, async (req, res) => {
   try {
-    const { text } = req.body;
+    const { text, imageUrl, eventImage, eventId, eventName } = req.body;
 
     if (!text) {
       return res.status(400).json({ msg: 'Text is required' });
@@ -16,6 +16,10 @@ router.post('/', auth, async (req, res) => {
     const newPost = new Post({
       text,
       user: req.user.id,
+      imageUrl: imageUrl || null,
+      eventImage: eventImage || null,
+      eventName: eventName || null,
+      eventId: eventId || null,
     });
 
     const post = await newPost.save();
