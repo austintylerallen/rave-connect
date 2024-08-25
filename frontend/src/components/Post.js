@@ -1,6 +1,6 @@
 import React from 'react';
 import { formatDistanceToNow } from 'date-fns';
-import { FaEdit, FaTrash, FaHeart, FaReply, FaTag } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaHeart, FaReply } from 'react-icons/fa';
 
 const Post = ({ post, handleEdit, handleDelete, handleLike, handleReply }) => {
   return (
@@ -48,19 +48,13 @@ const Post = ({ post, handleEdit, handleDelete, handleLike, handleReply }) => {
           Your browser does not support the video tag.
         </video>
       )}
-      {post.eventImage && (
-        <div className="mt-4 flex items-center">
-          <img src={post.eventImage} alt="Event" className="w-20 h-20 object-cover rounded-lg mr-3" />
-          <span className="text-lg font-semibold text-gray-900">{post.event?.name || 'Unnamed Event'}</span>
-        </div>
-      )}
       <div className="mt-4 flex items-center">
         <button
           onClick={() => handleLike(post._id)}
           className="mr-3 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors flex items-center"
         >
           <FaHeart className="mr-2" />
-          Like ({post.likes.length})
+          Like ({post.likes?.length || 0})
         </button>
         <button
           onClick={() => handleReply(post._id)}

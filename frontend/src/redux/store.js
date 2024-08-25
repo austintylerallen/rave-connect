@@ -1,11 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit';
-import rootReducer from './reducers/rootReducer';
-import { thunk } from 'redux-thunk';
+import authReducer from './reducers/authReducer';
+import notificationsReducer from './slices/notificationsSlice'; // Add this import
 
 const store = configureStore({
-  reducer: rootReducer,
-  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(thunk),
-  devTools: process.env.NODE_ENV !== 'production',
+  reducer: {
+    auth: authReducer,
+    notifications: notificationsReducer, // Add this to the store
+  },
 });
 
 export default store;

@@ -1,3 +1,4 @@
+// postRoutes.js
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
@@ -11,6 +12,9 @@ router.post('/', auth, async (req, res) => {
     if (!text) {
       return res.status(400).json({ msg: 'Text is required' });
     }
+
+    // Log to check req.user.id
+    console.log('Creating post for user:', req.user.id);
 
     const newPost = new Post({
       text,
@@ -82,6 +86,34 @@ router.delete('/:id', auth, async (req, res) => {
     await post.deleteOne();  // This is the correct method to delete a post document
 
     res.json({ msg: 'Post removed' });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
+});
+
+router.post('/:id/like', auth, async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+
+    if (!post) {
+      return res.status(404).json({ msg: 'Post not found' });
+    }
+
+    // Check if the post has already been liked by the user
+    const likedIndex = post.likes.findIndex((like) => like.user.toString() === req.user.id);
+
+    if (likedIndex !== -1) {
+      // If the post is already liked, unlike it (remove the like)
+      post.likes.splice(likedIndex, 1);
+    } else {
+      // Otherwise, add a like
+      post.likes.unshift({ user: req.user.id });
+    }
+
+    await post.save();
+
+    return res.json(post);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server error');

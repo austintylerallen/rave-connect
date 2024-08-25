@@ -1,4 +1,3 @@
-// PostList.js
 import React from 'react';
 import Post from './Post';
 
@@ -8,7 +7,7 @@ const PostList = ({ posts, handleEdit, handleDelete, handleLike, handleReply }) 
       {posts.length > 0 ? (
         posts.map((post) => (
           <Post
-            key={post._id}
+            key={post._id} // Ensure each post has a unique key
             post={post}
             handleEdit={handleEdit}
             handleDelete={handleDelete}

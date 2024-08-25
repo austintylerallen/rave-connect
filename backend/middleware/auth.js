@@ -1,8 +1,9 @@
+// auth.js
 const jwt = require('jsonwebtoken');
 
 module.exports = function(req, res, next) {
   const token = req.header('Authorization');
-  
+
   console.log('Token received:', token); // Debugging line
 
   if (!token) {
@@ -13,6 +14,10 @@ module.exports = function(req, res, next) {
     const decoded = jwt.verify(token.replace('Bearer ', ''), process.env.JWT_SECRET);
     console.log('Decoded token:', decoded); // Debugging line
     req.user = decoded.user;
+
+    // Add more detailed logging to ensure req.user is correct
+    console.log('req.user:', req.user);
+
     next();
   } catch (err) {
     console.error('Token error:', err.message); // Debugging line

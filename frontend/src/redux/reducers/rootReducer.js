@@ -1,11 +1,10 @@
+// src/redux/rootReducer.js
 import { combineReducers } from 'redux';
-import authReducer from './authReducer';
-import profileReducer from './profileReducer';
+import authReducer from './authSlice';
 
 const rootReducer = combineReducers({
   auth: authReducer,
-  profile: profileReducer,
-  // Add more reducers as needed
+  // add other reducers here
 });
 
 export default rootReducer;

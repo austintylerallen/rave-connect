@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import axios from 'axios';
 import PostForm from './PostForm';
 import PostList from './PostList';
@@ -15,11 +16,13 @@ const Timeline = () => {
   const [image, setImage] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  
+  const navigate = useNavigate(); // Initialize useNavigate
+  
   useEffect(() => {
     fetchPosts();
   }, []);
-
+  
   const fetchPosts = async () => {
     setLoading(true);
     setError(null);
@@ -33,6 +36,7 @@ const Timeline = () => {
       setLoading(false);
     }
   };
+
 
   const handleEventSelect = (event) => {
     setSelectedEvent(event);
@@ -70,7 +74,6 @@ const Timeline = () => {
       },
     };
 
-    // Check if an image or video is present
     if (image) {
       postData = new FormData();
       postData.append('text', content.trim());
@@ -98,14 +101,15 @@ const Timeline = () => {
           postData,
           config
         );
+        setPosts(posts.map((post) => (post._id === editingPostId ? response.data : post)));
       } else {
         response = await axios.post(
           `${process.env.REACT_APP_API_URL}/api/posts`,
           postData,
           config
         );
+        setPosts([response.data, ...posts]);
       }
-      setPosts([response.data, ...posts]);
       setEditingPostId(null);
       setContent('');
       setImage(null);
@@ -114,7 +118,7 @@ const Timeline = () => {
       console.error('Error submitting post:', err.response?.data || err.message);
       setError('Failed to submit post. Please try again.');
     }
-};
+  };
 
   const handleEdit = (post) => {
     setEditingPostId(post._id);
@@ -157,26 +161,22 @@ const Timeline = () => {
     }
   };
 
+  // Handle like/unlike functionality
   const handleLike = async (postId) => {
-    const token = localStorage.getItem('token');
-
-    if (!token) {
-      setError('You must be logged in to perform this action.');
-      return;
-    }
-
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/posts/${postId}/like`, {}, config);
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/posts/${postId}/like`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        }
+      );
       setPosts(posts.map((post) => (post._id === postId ? response.data : post)));
-    } catch (err) {
-      console.error('Error liking post:', err);
-      setError('Failed to like post. Please try again.');
+    } catch (error) {
+      console.error('Error liking post:', error);
+      setError(error.response?.data?.msg || 'Failed to like post. Please try again.');
     }
   };
 
@@ -218,7 +218,7 @@ const Timeline = () => {
         handleSubmit={handleSubmit}
         editingPostId={editingPostId}
         handleCancelEdit={handleCancelEdit}
-        handleOpenModal={handleOpenModal} // Passing the function to PostForm
+        handleOpenModal={handleOpenModal}
       />
 
       {loading ? (
