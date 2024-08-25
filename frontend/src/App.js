@@ -10,7 +10,8 @@ import ForgotPassword from './components/ForgotPassword';
 import ResetPassword from './components/ResetPassword';
 import Login from './components/Login';
 import Register from './components/Register';
-import Timeline from './components/Timeline'; // Import the Timeline component
+import Timeline from './components/Timeline';
+import Notifications from './components/Notifications'; // Import the Notifications component
 
 function App() {
   return (
@@ -27,7 +28,8 @@ function App() {
           <Route path="/profile/:id/edit" element={<ProfileEdit />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
-          <Route path="/events" element={<EventList />} /> {/* Ensure events route is added */}
+          <Route path="/events" element={<EventList />} />
+          <Route path="/notifications" element={<Notifications />} /> {/* Add Notifications route */}
         </Routes>
       </div>
     </Router>

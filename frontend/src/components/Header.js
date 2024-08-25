@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { FaBell } from 'react-icons/fa';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -21,6 +22,10 @@ const Header = () => {
               <Link to="/" className="hover:text-purple mx-4">Home</Link>
               <Link to="/events" className="hover:text-purple mx-4">Events</Link>
               <Link to="/profile" className="hover:text-purple mx-4">Profile</Link>
+              <Link to="/notifications" className="hover:text-purple mx-4 relative">
+                <FaBell />
+                {/* You can add a notification badge here */}
+              </Link>
               <button onClick={handleLogout} className="hover:text-purple mx-4">Logout</button>
             </>
           ) : (

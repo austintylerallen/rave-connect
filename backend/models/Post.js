@@ -13,8 +13,8 @@ const PostSchema = new Schema({
   imageUrl: {
     type: String, // URL of the image stored in the cloud
   },
-  eventImage: {
-    type: String, // URL of the event image stored in the cloud or fetched from Spotify
+  videoUrl: {
+    type: String, // URL of the video stored in the cloud
   },
   eventId: {
     type: mongoose.Schema.Types.ObjectId,

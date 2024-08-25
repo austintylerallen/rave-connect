@@ -70,21 +70,24 @@ const Timeline = () => {
       },
     };
 
+    // Check if an image or video is present
     if (image) {
       postData = new FormData();
       postData.append('text', content.trim());
       postData.append('image', image);
       if (selectedEvent) {
         postData.append('event', selectedEvent.id);
-        postData.append('eventImage', selectedEvent.image); // Include event image URL
+        postData.append('eventImage', selectedEvent.image);
+        postData.append('eventName', selectedEvent.name);
       }
     } else {
-      config.headers['Content-Type'] = 'application/json';
       postData = {
         text: content.trim(),
-        event: selectedEvent?.id,  // Include event ID if an event is selected
-        eventImage: selectedEvent?.image,  // Include event image URL if an event is selected
+        event: selectedEvent?.id || null,
+        eventImage: selectedEvent?.image || null,
+        eventName: selectedEvent?.name || null,
       };
+      config.headers['Content-Type'] = 'application/json';
     }
 
     try {
@@ -111,7 +114,7 @@ const Timeline = () => {
       console.error('Error submitting post:', err.response?.data || err.message);
       setError('Failed to submit post. Please try again.');
     }
-  };
+};
 
   const handleEdit = (post) => {
     setEditingPostId(post._id);

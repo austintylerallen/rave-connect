@@ -21,6 +21,7 @@ const Login = () => {
       const user = jwtDecode(token).user;
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem('userId', user._id); // Store userId separately
 
       // Redirect to the timeline page after successful login
       navigate(`/`);

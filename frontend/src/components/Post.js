@@ -3,9 +3,6 @@ import { formatDistanceToNow } from 'date-fns';
 import { FaEdit, FaTrash, FaHeart, FaReply, FaTag } from 'react-icons/fa';
 
 const Post = ({ post, handleEdit, handleDelete, handleLike, handleReply }) => {
-  // Conditionally get the event or artist name
-  const eventName = post.event?.name || post.eventImage?.artistName || 'Unnamed Event';
-
   return (
     <div className="mb-6 p-6 bg-white rounded-lg shadow-md">
       <div className="flex items-center justify-between mb-2">
@@ -45,10 +42,16 @@ const Post = ({ post, handleEdit, handleDelete, handleLike, handleReply }) => {
       {post.imageUrl && (
         <img src={post.imageUrl} alt="Post" className="w-full mt-4 rounded-lg" />
       )}
+      {post.videoUrl && (
+        <video controls className="w-full mt-4 rounded-lg">
+          <source src={post.videoUrl} type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+      )}
       {post.eventImage && (
         <div className="mt-4 flex items-center">
           <img src={post.eventImage} alt="Event" className="w-20 h-20 object-cover rounded-lg mr-3" />
-          <span className="text-lg font-semibold text-gray-900">{eventName}</span>
+          <span className="text-lg font-semibold text-gray-900">{post.event?.name || 'Unnamed Event'}</span>
         </div>
       )}
       <div className="mt-4 flex items-center">
