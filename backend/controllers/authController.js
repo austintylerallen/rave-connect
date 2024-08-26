@@ -6,7 +6,6 @@ exports.register = async (req, res) => {
   const { username, email, password } = req.body;
 
   try {
-    // Check if the user already exists
     let user = await User.findOne({ email });
     if (user) {
       return res.status(400).json({ msg: 'User already exists' });
@@ -18,10 +17,8 @@ exports.register = async (req, res) => {
       password,
     });
 
-    // Hash password (handled in the User model's pre-save middleware)
     await user.save();
 
-    // Return JWT
     const payload = {
       user: {
         id: user.id,

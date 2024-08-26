@@ -1,39 +1,66 @@
-// redux/slices/authSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { jwtDecode } from 'jwt-decode'; // Use named import if needed
 import axios from 'axios';
-import { jwtDecode } from 'jwt-decode';
 
-// Async actions using createAsyncThunk
-export const login = createAsyncThunk('auth/login', async ({ email, password }, thunkAPI) => {
-  try {
-    const res = await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/login`, { email, password });
-    return res.data.token;
-  } catch (error) {
-    return thunkAPI.rejectWithValue(error.response.data);
+const token = localStorage.getItem('token');
+const user = token ? jwtDecode(token) : null;
+
+const initialState = {
+  user: user || null,
+  token: token || null,
+  isAuthenticated: !!token,
+  loading: false,
+  error: null,
+};
+
+// Async thunk for login
+export const login = createAsyncThunk(
+  'auth/login',
+  async ({ email, password }, { rejectWithValue }) => {
+    try {
+      const response = await axios.post('http://localhost:5002/api/auth/login', { email, password }); // Updated URL
+      const token = response.data.token;
+      const user = jwtDecode(token);
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      return { user, token };
+    } catch (error) {
+      return rejectWithValue(error.response.data.message);
+    }
   }
-});
+);
 
-export const register = createAsyncThunk('auth/register', async ({ username, email, password }, thunkAPI) => {
-  try {
-    const res = await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/register`, { username, email, password });
-    return res.data.token;
-  } catch (error) {
-    return thunkAPI.rejectWithValue(error.response.data);
+// Async thunk for register
+export const register = createAsyncThunk(
+  'auth/register',
+  async ({ username, email, password }, { rejectWithValue }) => {
+    try {
+      const response = await axios.post('http://localhost:5002/api/auth/register', { username, email, password }); // Updated URL
+      const token = response.data.token;
+      const user = jwtDecode(token);
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      return { user, token };
+    } catch (error) {
+      return rejectWithValue(error.response.data.message);
+    }
   }
-});
+);
 
-// Slice setup
 const authSlice = createSlice({
   name: 'auth',
-  initialState: {
-    user: null,
-    token: null,
-    isAuthenticated: null,
-    loading: true,
-    error: null,
-  },
+  initialState,
   reducers: {
-    logout(state) {
+    setUser(state, action) {
+      const token = action.payload;
+      const user = jwtDecode(token);
+      state.token = token;
+      state.user = user;
+      state.isAuthenticated = true;
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+    },
+    clearUser(state) {
       state.user = null;
       state.token = null;
       state.isAuthenticated = false;
@@ -43,36 +70,37 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      .addCase(login.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(login.fulfilled, (state, action) => {
-        const token = action.payload;
-        const user = jwtDecode(token);
-        state.token = token;
-        state.user = user;
-        state.isAuthenticated = true;
         state.loading = false;
-        localStorage.setItem('token', token);
-        localStorage.setItem('user', JSON.stringify(user));
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        state.isAuthenticated = true;
       })
       .addCase(login.rejected, (state, action) => {
-        state.error = action.payload;
         state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(register.pending, (state) => {
+        state.loading = true;
+        state.error = null;
       })
       .addCase(register.fulfilled, (state, action) => {
-        const token = action.payload;
-        const user = jwtDecode(token);
-        state.token = token;
-        state.user = user;
-        state.isAuthenticated = true;
         state.loading = false;
-        localStorage.setItem('token', token);
-        localStorage.setItem('user', JSON.stringify(user));
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        state.isAuthenticated = true;
       })
       .addCase(register.rejected, (state, action) => {
-        state.error = action.payload;
         state.loading = false;
+        state.error = action.payload;
       });
   },
 });
 
-export const { logout } = authSlice.actions;
+export const { setUser, clearUser } = authSlice.actions;
+
 export default authSlice.reducer;

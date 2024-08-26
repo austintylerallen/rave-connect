@@ -1,4 +1,3 @@
-// App.js
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Header from './components/Header';
@@ -13,6 +12,7 @@ import Login from './components/Login';
 import Register from './components/Register';
 import Timeline from './components/Timeline';
 import Notifications from './components/Notifications';
+import LandingPage from './components/LandingPage'; // Import the new LandingPage
 
 function App() {
   return (
@@ -20,7 +20,7 @@ function App() {
       <div className="App bg-darkTeal text-white min-h-screen">
         <Header />
         <Routes>
-          <Route path="/" element={<Timeline />} />
+          <Route path="/" element={<LandingPage />} /> {/* Default to LandingPage */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/create-event" element={<CreateEvent />} />
@@ -31,6 +31,7 @@ function App() {
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/events" element={<EventList />} />
           <Route path="/notifications" element={<Notifications />} />
+          <Route path="/timeline" element={<Timeline />} /> {/* Move timeline here */}
         </Routes>
       </div>
     </Router>

@@ -3,7 +3,7 @@ import { createSlice } from '@reduxjs/toolkit';
 const notificationsSlice = createSlice({
   name: 'notifications',
   initialState: {
-    notifications: [], // Initial empty array for notifications
+    notifications: [],
     loading: false,
     error: null,
   },
@@ -23,7 +23,7 @@ const notificationsSlice = createSlice({
       state.notifications.push(action.payload);
     },
     markNotificationAsRead(state, action) {
-      const index = state.notifications.findIndex(notification => notification.id === action.payload);
+      const index = state.notifications.findIndex(notification => notification._id === action.payload);
       if (index !== -1) {
         state.notifications[index].read = true;
       }

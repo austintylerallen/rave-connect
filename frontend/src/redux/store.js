@@ -1,12 +1,14 @@
 import { configureStore } from '@reduxjs/toolkit';
-import authReducer from './reducers/authReducer';
-import notificationsReducer from './slices/notificationsSlice'; // Add this import
+import authReducer from './slices/authSlice';
+import notificationsReducer from './slices/notificationsSlice'; // Adjust the path if needed
 
 const store = configureStore({
   reducer: {
     auth: authReducer,
-    notifications: notificationsReducer, // Add this to the store
+    notifications: notificationsReducer,
+    // Add any other slices here as needed
   },
+  // You can add middleware or enhancers if necessary, but Redux Toolkit provides good defaults
 });
 
 export default store;

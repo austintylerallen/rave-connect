@@ -9,29 +9,34 @@ const Header = () => {
   const handleLogout = () => {
     localStorage.removeItem('user');
     localStorage.removeItem('token');
-    navigate('/login');
+    navigate('/'); // Redirect to the landing page
   };
 
   return (
     <header className="bg-teal text-white p-4">
       <div className="container mx-auto flex justify-between items-center">
         <h1 className="text-2xl font-bold">Rave Connect</h1>
-        <nav>
+        <nav className="flex items-center space-x-6">
           {isLoggedIn ? (
             <>
-              <Link to="/" className="hover:text-purple mx-4">Home</Link>
-              <Link to="/events" className="hover:text-purple mx-4">Events</Link>
-              <Link to="/profile" className="hover:text-purple mx-4">Profile</Link>
-              <Link to="/notifications" className="hover:text-purple mx-4 relative">
+              <Link to="/Timeline" className="hover:text-purple">Home</Link>
+              <Link to="/events" className="hover:text-purple">Events</Link>
+              <Link to="/profile" className="hover:text-purple">Profile</Link>
+              <Link to="/notifications" className="hover:text-purple relative">
                 <FaBell />
                 {/* You can add a notification badge here */}
               </Link>
-              <button onClick={handleLogout} className="hover:text-purple mx-4">Logout</button>
+              <button 
+                onClick={handleLogout} 
+                className="hover:text-purple focus:outline-none"
+              >
+                Logout
+              </button>
             </>
           ) : (
             <>
-              <Link to="/login" className="hover:text-purple mx-4">Login</Link>
-              <Link to="/register" className="hover:text-purple mx-4">Register</Link>
+              <Link to="/login" className="hover:text-purple">Login</Link>
+              <Link to="/register" className="hover:text-purple">Register</Link>
             </>
           )}
         </nav>

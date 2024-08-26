@@ -1,8 +1,8 @@
-// routes/notificationRoutes.js
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
 const Notification = require('../models/Notification');
+const io = require('../server').io; // Import the io instance
 
 // Create a new notification
 router.post('/', auth, async (req, res) => {
@@ -18,6 +18,9 @@ router.post('/', auth, async (req, res) => {
     });
 
     const notification = await newNotification.save();
+
+    io.to(req.user.id).emit('notification', notification); // Emit the notification to the user
+
     res.json(notification);
   } catch (err) {
     console.error(err.message);
