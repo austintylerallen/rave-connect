@@ -4,6 +4,8 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const http = require('http');
 const { Server } = require('socket.io');
+const cron = require('node-cron');
+const Event = require('./models/Event');
 
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
@@ -41,6 +43,17 @@ app.use('/api/events', eventRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/spotify', spotifyRoutes);
 app.use('/api/notifications', notificationRoutes);
+
+// Cron job to delete events 12 hours after they end
+cron.schedule('0 * * * *', async () => {
+  const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000);
+  try {
+    const result = await Event.deleteMany({ date: { $lt: twelveHoursAgo } });
+    console.log(`Deleted ${result.deletedCount} events that occurred 12+ hours ago.`);
+  } catch (err) {
+    console.error('Error deleting old events:', err.message);
+  }
+});
 
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
