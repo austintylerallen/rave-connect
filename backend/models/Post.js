@@ -21,6 +21,14 @@ const PostSchema = new Schema({
     ref: 'Event', // Reference to an event
     required: false,
   },
+  eventName: {
+    type: String, // Name of the event
+    required: false,
+  },
+  eventImage: {
+    type: String, // URL of the event image
+    required: false,
+  },
   likes: [
     {
       user: {

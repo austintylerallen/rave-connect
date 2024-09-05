@@ -97,3 +97,54 @@
     background-color: #555;
   }
   
+
+  .reply-button {
+    position: relative;
+    z-index: 9999;
+  }
+  
+  .comment-form {
+    position: relative;
+    background-color: white;
+    padding: 10px;
+    border: 1px solid #ccc;
+    margin-top: 10px;
+  }
+  
+  .comment-form textarea {
+    width: 100%;
+    padding: 10px;
+    border-radius: 4px;
+    background-color: #f7f7f7;
+    color: black;
+  }
+  
+
+  .comment-form textarea {
+    background-color: #f7f7f7;
+    color: #333 !important;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+  }
+  
+  .comment-form textarea:focus {
+    border-color: #3498db;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+  }
+  
+  .comment-form button {
+    padding: 8px 16px;
+    background-color: #1abc9c;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  
+  .comment-form button:hover {
+    background-color: #16a085;
+  }
+  
+

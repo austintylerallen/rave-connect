@@ -13,6 +13,7 @@ const eventRoutes = require('./routes/eventRoutes');
 const postRoutes = require('./routes/postRoutes');
 const spotifyRoutes = require('./routes/spotifyRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
+const commentRoutes = require('./routes/commentRoutes');
 
 dotenv.config();
 
@@ -43,6 +44,7 @@ app.use('/api/events', eventRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/spotify', spotifyRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/comments', commentRoutes); // Ensure this line exists
 
 // Cron job to delete events 12 hours after they end
 cron.schedule('0 * * * *', async () => {
