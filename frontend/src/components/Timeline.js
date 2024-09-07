@@ -50,30 +50,32 @@ const Timeline = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
-  
+
     if (!content.trim()) {
       setError('Post content cannot be empty.');
       return;
     }
-  
+
     const token = localStorage.getItem('token');
-    
+
     if (!token) {
       setError('You must be logged in to perform this action.');
       return;
     }
-  
+
     let postData;
     let config = {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     };
-  
+
+    // Handle image uploads with FormData
     if (image) {
-      postData = new FormData();  // Use FormData for image upload
+      postData = new FormData();
       postData.append('text', content.trim());
-      postData.append('image', image);  // Ensure the image is appended properly
+      postData.append('image', image);
+
       if (selectedEvent) {
         postData.append('event', selectedEvent.id);
         postData.append('eventImage', selectedEvent.image);
@@ -88,7 +90,7 @@ const Timeline = () => {
       };
       config.headers['Content-Type'] = 'application/json'; // Ensure content-type for JSON
     }
-  
+
     try {
       let response;
       if (editingPostId) {
@@ -106,6 +108,7 @@ const Timeline = () => {
         );
         setPosts([response.data, ...posts]);
       }
+
       setEditingPostId(null);
       setContent('');
       setImage(null);
@@ -115,7 +118,6 @@ const Timeline = () => {
       setError('Failed to submit post. Please try again.');
     }
   };
-  
 
   const handleEdit = (post) => {
     setEditingPostId(post._id);
@@ -183,8 +185,8 @@ const Timeline = () => {
       style={{
         backgroundColor: 'rgba(0, 0, 0, 0.5)', // Slight black overlay
         maxWidth: '800px', // Restrict width to avoid full screen extension
-        marginLeft: 'auto', // Align center
-        marginRight: 'auto', // Align center
+        marginLeft: 'auto',
+        marginRight: 'auto',
       }}
     >
       <h2 className="text-3xl font-bold text-white mb-6">Timeline</h2>

@@ -18,9 +18,14 @@ const Login = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/Timeline'); // Redirect to Timeline (home) after successful login
+      navigate('/Timeline'); // Redirect to Timeline after successful login
     }
   }, [isAuthenticated, navigate]);
+
+  useEffect(() => {
+    // Clear the input fields after login attempt
+    setPassword('');
+  }, [loading]);
 
   return (
     <div className="flex items-center justify-center h-screen bg-darkTeal">

@@ -1,15 +1,24 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaBell } from 'react-icons/fa';
+import { useDispatch, useSelector } from 'react-redux';
+import { clearUser } from '../redux/slices/authSlice'; // Make sure this is correctly imported
 
 const Header = () => {
   const navigate = useNavigate();
-  const isLoggedIn = !!localStorage.getItem('user'); // Check if user is logged in
+  const dispatch = useDispatch(); // Initialize Redux dispatch
+  const { isAuthenticated } = useSelector((state) => state.auth); // Get authentication status from Redux state
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
+    // Clear token and user info from localStorage
     localStorage.removeItem('token');
-    navigate('/'); // Redirect to the landing page
+    localStorage.removeItem('user');
+
+    // Dispatch action to clear user from Redux state
+    dispatch(clearUser());
+
+    // Redirect to login page after logging out
+    navigate('/login');
   };
 
   return (
@@ -17,9 +26,9 @@ const Header = () => {
       <div className="container mx-auto flex justify-between items-center">
         <h1 className="text-2xl font-bold">Rave Connect</h1>
         <nav className="flex items-center space-x-6">
-          {isLoggedIn ? (
+          {isAuthenticated ? ( // Check authentication from Redux state
             <>
-              <Link to="/Timeline" className="hover:text-purple">Home</Link>
+              <Link to="/timeline" className="hover:text-purple">Home</Link>
               <Link to="/events" className="hover:text-purple">Events</Link>
               <Link to="/profile" className="hover:text-purple">Profile</Link>
               <Link to="/notifications" className="hover:text-purple relative">
