@@ -6,6 +6,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const cron = require('node-cron');
 const Event = require('./models/Event');
+const cloudinaryRoutes = require('./routes/cloudinaryRoutes'); // Adjust the path as needed
 
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
@@ -45,6 +46,7 @@ app.use('/api/posts', postRoutes);
 app.use('/api/spotify', spotifyRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/comments', commentRoutes); // Ensure this line exists
+app.use('/api/cloudinary', cloudinaryRoutes);
 
 // Cron job to delete events 12 hours after they end
 cron.schedule('0 * * * *', async () => {

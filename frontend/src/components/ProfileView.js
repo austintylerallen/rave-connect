@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useParams, Navigate } from 'react-router-dom';
 
 const ProfileView = () => {
-  const { id } = useParams();  // Ensure this ID is the correct user ID
+  const { id } = useParams();  // Get the user ID from URL parameters
   const [profile, setProfile] = useState(null);
   const [isFollowing, setIsFollowing] = useState(false);
   const [error, setError] = useState('');
@@ -16,10 +16,11 @@ const ProfileView = () => {
 
     const fetchProfile = async () => {
       try {
-        const response = await axios.get(`/api/users/${id}`);  // Ensure this ID matches the user ID from the database
+        const response = await axios.get(`/api/users/${id}`);  // Ensure you are fetching by ID
         setProfile(response.data);
-        const currentUser = await axios.get('/api/auth/user');
-        setIsFollowing(response.data.followers.includes(currentUser.data.id));
+
+        const currentUserResponse = await axios.get('/api/auth/user');
+        setIsFollowing(response.data.followers.includes(currentUserResponse.data.id)); // Compare with the logged-in user
       } catch (error) {
         console.error('Error fetching profile:', error);
         setError('Failed to fetch profile');

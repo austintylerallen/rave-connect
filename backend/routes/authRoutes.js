@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const { register, login, getUser } = require('../controllers/authController');
 const auth = require('../middleware/auth');
-const User = require('../models/User');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 
@@ -11,8 +10,7 @@ router.post('/register', register);
 router.post('/login', login);
 router.get('/user', auth, getUser);
 
-// New Routes for Password Recovery
-
+// Password Recovery Routes
 // Request password reset
 router.post('/forgot-password', async (req, res) => {
   const { email } = req.body;
@@ -23,7 +21,7 @@ router.post('/forgot-password', async (req, res) => {
       return res.status(400).json({ msg: 'User with this email does not exist' });
     }
 
-    // Create a reset token
+    // Create reset token and expiration
     const resetToken = crypto.randomBytes(32).toString('hex');
     const resetTokenExpires = Date.now() + 3600000; // 1 hour
 
@@ -31,7 +29,7 @@ router.post('/forgot-password', async (req, res) => {
     user.resetPasswordExpires = resetTokenExpires;
     await user.save();
 
-    // Send email with reset link
+    // Send password reset email
     const transporter = nodemailer.createTransport({
       service: 'Gmail',
       auth: {
@@ -46,10 +44,7 @@ router.post('/forgot-password', async (req, res) => {
       to: user.email,
       from: process.env.EMAIL_USER,
       subject: 'Password Reset Request',
-      text: `You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n
-      Please click on the following link, or paste this into your browser to complete the process:\n\n
-      ${resetUrl}\n\n
-      If you did not request this, please ignore this email and your password will remain unchanged.\n`,
+      text: `You (or someone else) requested a password reset. Click the link to reset your password: \n\n${resetUrl}\n\nIf you didn't request this, ignore this email.`,
     };
 
     transporter.sendMail(mailOptions, (err) => {
@@ -57,8 +52,7 @@ router.post('/forgot-password', async (req, res) => {
         console.error('Error sending email:', err);
         return res.status(500).json({ msg: 'Error sending email' });
       }
-
-      res.json({ msg: 'Email sent. Please check your inbox.' });
+      res.json({ msg: 'Password reset email sent. Check your inbox.' });
     });
   } catch (err) {
     console.error(err.message);
@@ -81,13 +75,14 @@ router.post('/reset-password/:token', async (req, res) => {
       return res.status(400).json({ msg: 'Invalid or expired token' });
     }
 
-    user.password = password; // Password will be hashed by the pre-save middleware
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(password, salt); // Hash the new password
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
 
     await user.save();
 
-    res.json({ msg: 'Password has been reset successfully' });
+    res.json({ msg: 'Password reset successful.' });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server error');

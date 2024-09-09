@@ -8,6 +8,7 @@ const userSchema = new mongoose.Schema({
   bio: { type: String },
   favoriteGenres: { type: [String] },
   profilePicture: { type: String },
+  coverPhoto: { type: String },
   followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   resetPasswordToken: { type: String },
