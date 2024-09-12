@@ -23,8 +23,7 @@ if (token) {
     }
   } catch (error) {
     console.error('Error decoding token:', error);
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    localStorage.clear();  // Clear localStorage if there's an error decoding the token
   }
 }
 
@@ -37,32 +36,24 @@ const initialState = {
 };
 
 // Async thunk for login
-export const login = createAsyncThunk(
-  'auth/login',
-  async ({ email, password }, { rejectWithValue }) => {
-    try {
-      const response = await api.post('/api/auth/login', { email, password });
-      const token = response.data.token;
-      const decoded = jwtDecode(token);  // Decode the token to get user data
+export const login = createAsyncThunk('auth/login', async (credentials, thunkAPI) => {
+  try {
+    const response = await api.post('/api/auth/login', credentials);
+    const token = response.data.token;
 
-      console.log('Decoded token on login:', decoded);  // Log the decoded token for debugging
+    // Decode token or extract the userId from the response and store it
+    const decodedToken = jwtDecode(token); // Make sure decodedToken.user.id exists
+    localStorage.setItem('token', token);
+    localStorage.setItem('userId', decodedToken.user.id); // Store userId in localStorage
 
-      // Check for user ID inside the decoded token's user object
-      if (!decoded?.user?.id) {
-        throw new Error('User ID is missing from decoded token');
-      }
+    console.log('Decoded token:', decodedToken); // Log the decoded token
+    console.log('Current User ID:', localStorage.getItem('userId')); // Check if the userId was set correctly
 
-      // Store token and user information in localStorage
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(decoded.user));  // Store only the user object
-
-      return { user: decoded.user, token }; // Return the user object and token
-    } catch (error) {
-      console.error('Login error:', error);
-      return rejectWithValue(error.response?.data?.message || error.message);
-    }
+    return { user: decodedToken.user, token };
+  } catch (error) {
+    return thunkAPI.rejectWithValue(error.response?.data?.message || 'Login failed');
   }
-);
+});
 
 // Async thunk for registration
 export const register = createAsyncThunk(
@@ -82,15 +73,20 @@ export const register = createAsyncThunk(
 
       // Store token and user information in localStorage
       localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(decoded.user));  // Store only the user object
+      localStorage.setItem('userId', decoded.user.id);  // Store the userId
 
       return { user: decoded.user, token };
     } catch (error) {
       console.error('Registration error:', error);
-      return rejectWithValue(error.response?.data?.message || error.message);
+      return rejectWithValue(error.response?.data?.message || 'Registration failed');
     }
   }
 );
+
+// Async thunk for logout (example)
+export const logout = createAsyncThunk('auth/logout', async () => {
+  localStorage.clear();  // Clear localStorage when logging out
+});
 
 const authSlice = createSlice({
   name: 'auth',
@@ -99,7 +95,7 @@ const authSlice = createSlice({
     setUser(state, action) {
       const token = action.payload;
       const decoded = jwtDecode(token);
-      console.log('Decoded token on setUser:', decoded);  // Log the decoded token for debugging
+      console.log('Login successful, userId:', decoded.user.id); // Log the decoded token for debugging
 
       // Check for user ID inside the decoded token's user object
       if (!decoded?.user?.id) {
@@ -110,14 +106,13 @@ const authSlice = createSlice({
       state.user = decoded.user;
       state.isAuthenticated = true;
       localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(decoded.user));
+      localStorage.setItem('userId', decoded.user.id); // Make sure userId is stored correctly
     },
     clearUser(state) {
       state.user = null;
       state.token = null;
       state.isAuthenticated = false;
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      localStorage.clear();  // Clear localStorage when clearing user
     },
     clearError(state) {
       state.error = null;

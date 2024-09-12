@@ -47,13 +47,14 @@ router.post('/', auth, upload.single('image'), async (req, res) => {
     const newPost = new Post({
       text,
       user: req.user.id,
-      imageUrl: imageUrl || null, // Set the image URL if uploaded
+      imageUrl: imageUrl || null,
       eventImage: eventImage || null,
       eventName: eventName || null,
     });
 
     let post = await newPost.save();
-    post = await post.populate('user', 'username profilePicture');
+    post = await post.populate('user', 'username profilePicture'); // Populate user directly without execPopulate()
+    
     res.json(post);
   } catch (err) {
     console.error(err.message);
@@ -61,16 +62,22 @@ router.post('/', auth, upload.single('image'), async (req, res) => {
   }
 });
 
+
 // Get all posts
 router.get('/', async (req, res) => {
   try {
-    const posts = await Post.find().sort({ date: -1 }).populate('user', 'username profilePicture');
+    // Fetch posts and populate user data
+    const posts = await Post.find()
+      .sort({ date: -1 })
+      .populate('user', 'username profilePicture'); // Ensure user is populated with these fields
+    
     res.json(posts);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server error');
   }
 });
+
 
 // Update a post
 router.put('/:id', auth, async (req, res) => {

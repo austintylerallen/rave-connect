@@ -1,0 +1,11 @@
+/* index.css */
+
+/* Add this CSS for the sidebar */
+.sidebar {
+    background-image: url('/background.svg'); /* Reference to the SVG in the public directory */
+    background-size: cover; /* Adjust the background size */
+    background-position: center; /* Center the background */
+  }
+  
+  /* Other global styles can remain here */
+  

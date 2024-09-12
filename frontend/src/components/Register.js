@@ -14,20 +14,25 @@ const Register = () => {
 
   const handleRegister = (e) => {
     e.preventDefault();
+
+    // Clear any existing data from localStorage before registering a new user
+    window.localStorage.clear();
+
+    // Dispatch the register action with new user details
     dispatch(register({ username, email, password }));
   };
 
   // Effect to handle redirect after successful registration
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/profile'); // Redirect to profile or any page after successful registration
+      navigate(`/profile/${localStorage.getItem('userId')}`); // Redirect to profile page after successful registration
     }
   }, [isAuthenticated, navigate]);
 
   return (
-    <div className="flex items-center justify-center h-screen bg-darkTeal">
-      <div className="w-full max-w-md bg-teal p-8 rounded-lg shadow-md">
-        <h2 className="text-3xl font-bold text-white text-center mb-6">Register</h2>
+    <div className="flex items-center justify-center h-screen">
+      <div className="w-full max-w-md p-8 rounded-lg shadow-md"> {/* No background color */}
+        <h2 className="text-3xl font-bold text-center mb-6">Register</h2>
         <form onSubmit={handleRegister} className="space-y-4">
           <input
             type="text"
@@ -35,7 +40,7 @@ const Register = () => {
             onChange={(e) => setUsername(e.target.value)}
             placeholder="Username"
             required
-            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple"
+            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple text-black placeholder-black" // Added text-black and placeholder-black
           />
           <input
             type="email"
@@ -43,7 +48,7 @@ const Register = () => {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email"
             required
-            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple"
+            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple text-black placeholder-black" // Added text-black and placeholder-black
           />
           <input
             type="password"
@@ -51,7 +56,7 @@ const Register = () => {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
             required
-            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple"
+            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple text-black placeholder-black" // Added text-black and placeholder-black
           />
           <button
             type="submit"

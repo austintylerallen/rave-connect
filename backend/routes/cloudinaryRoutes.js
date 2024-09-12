@@ -1,27 +1,35 @@
-// cloudinaryRoutes.js
 const express = require('express');
 const router = express.Router();
 const cloudinary = require('cloudinary').v2;
-const crypto = require('crypto');
+const dotenv = require('dotenv');
+dotenv.config(); // Load environment variables
 
-// Cloudinary config (set up your credentials)
+// Cloudinary config (use environment variables for credentials)
 cloudinary.config({
-  cloud_name: 'dnoc047l5',
-  api_key: '589989464939994',
-  api_secret: 'qjm_6FfM7nB_qRqJy40gHzp7amY', // Use your actual API secret here
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 // Route to generate a signed upload URL
 router.post('/get-signature', (req, res) => {
-  const timestamp = Math.floor(new Date().getTime() / 1000);
-  const signature = cloudinary.utils.api_sign_request(
-    {
-      timestamp: timestamp,
-    },
-    process.env.CLOUDINARY_API_SECRET
-  );
-  
-  res.json({ timestamp, signature });
+  try {
+    const timestamp = Math.floor(new Date().getTime() / 1000);
+    
+    // Generate the signature using Cloudinary API secret
+    const signature = cloudinary.utils.api_sign_request(
+      {
+        timestamp: timestamp,
+      },
+      process.env.CLOUDINARY_API_SECRET
+    );
+    
+    // Return the timestamp and signature
+    res.json({ timestamp, signature });
+  } catch (err) {
+    console.error('Error generating Cloudinary signature:', err);
+    res.status(500).json({ message: 'Failed to generate Cloudinary signature' });
+  }
 });
 
 module.exports = router;

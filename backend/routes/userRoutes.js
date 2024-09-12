@@ -19,22 +19,34 @@ router.get('/:id', auth, async (req, res) => {
 router.put('/:id', auth, async (req, res) => {
   const { bio, favoriteGenres, profilePicture, coverPhoto } = req.body;
 
+  console.log("Received profilePicture:", profilePicture); // Ensure this is logged correctly
+
   try {
     let user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ msg: 'User not found' });
 
+    // Update profile fields
     user.bio = bio || user.bio;
     user.favoriteGenres = favoriteGenres || user.favoriteGenres;
-    user.profilePicture = profilePicture || user.profilePicture;
-    user.coverPhoto = coverPhoto || user.coverPhoto; // Update the cover photo if provided
+    user.profilePicture = profilePicture || user.profilePicture; // Ensure profilePicture is being updated
+    user.coverPhoto = coverPhoto || user.coverPhoto;
 
+    console.log("Saving profilePicture as:", user.profilePicture); // Log the profile picture being saved
+
+    // Save the updated user
     await user.save();
+    console.log("Updated user profile picture:", user.profilePicture); // Log the saved profile picture
+    console.log("Updated user cover photo:", user.coverPhoto);
+
+    // Send the updated user data in the response
     res.json(user);
   } catch (err) {
     console.error('Error updating user profile:', err.message);
     res.status(500).send('Server error');
   }
 });
+
+
 
 // Follow a user
 router.post('/follow/:id', auth, async (req, res) => {

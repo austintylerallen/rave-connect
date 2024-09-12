@@ -25,7 +25,22 @@ const Timeline = () => {
     setError(null);
     try {
       const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/posts`);
-      setPosts(response.data);
+      
+      // Log the full API response to inspect the structure of the data
+      console.log('API Response:', response.data);
+      
+      // Ensure the post data is properly structured for the frontend
+      const formattedPosts = response.data.map(post => ({
+        ...post,
+        user: post.user || {
+          _id: 'unknown',
+          username: 'Anonymous',
+          profilePicture: '/profile-photo-placeholder.jpg'
+        },
+        comments: post.comments || []
+      }));
+  
+      setPosts(formattedPosts);
     } catch (err) {
       console.error('Error fetching posts:', err);
       setError('Failed to fetch posts. Please try again later.');
@@ -33,6 +48,8 @@ const Timeline = () => {
       setLoading(false);
     }
   };
+  
+  
 
   const handleEventSelect = (event) => {
     setSelectedEvent(event);
@@ -50,32 +67,32 @@ const Timeline = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
-
+  
     if (!content.trim()) {
       setError('Post content cannot be empty.');
       return;
     }
-
+  
     const token = localStorage.getItem('token');
-
+  
     if (!token) {
       setError('You must be logged in to perform this action.');
       return;
     }
-
+  
     let postData;
     let config = {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     };
-
+  
     // Handle image uploads with FormData
     if (image) {
       postData = new FormData();
       postData.append('text', content.trim());
       postData.append('image', image);
-
+  
       if (selectedEvent) {
         postData.append('event', selectedEvent.id);
         postData.append('eventImage', selectedEvent.image);
@@ -90,7 +107,7 @@ const Timeline = () => {
       };
       config.headers['Content-Type'] = 'application/json'; // Ensure content-type for JSON
     }
-
+  
     try {
       let response;
       if (editingPostId) {
@@ -108,16 +125,17 @@ const Timeline = () => {
         );
         setPosts([response.data, ...posts]);
       }
-
+  
       setEditingPostId(null);
       setContent('');
       setImage(null);
       setSelectedEvent(null);
     } catch (err) {
-      console.error('Error submitting post:', err);
+      console.error('Error submitting post:', err); // Log the error for debugging
       setError('Failed to submit post. Please try again.');
     }
   };
+  
 
   const handleEdit = (post) => {
     setEditingPostId(post._id);

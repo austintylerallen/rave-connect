@@ -7,8 +7,8 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   bio: { type: String },
   favoriteGenres: { type: [String] },
-  profilePicture: { type: String },
-  coverPhoto: { type: String },
+  profilePicture: { type: String }, // Ensure profilePicture is included here
+  coverPhoto: { type: String },     // Ensure coverPhoto is included here
   followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   resetPasswordToken: { type: String },
