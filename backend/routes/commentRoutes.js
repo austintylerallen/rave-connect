@@ -3,27 +3,33 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const Comment = require('../models/Comment');
 
-// POST a comment or reply
-router.post('/:postId', auth, async (req, res) => {
-  try {
-    const { text, parentId } = req.body;
-    const postId = req.params.postId;
 
-    // Create a new comment (or reply)
+// Create a comment
+router.post('/:postId', auth, async (req, res) => {
+  const { text, parentId } = req.body;
+
+  try {
+    const userId = req.user.id; // The 'auth' middleware should decode the JWT and attach the user to req
+
+    if (!text) {
+      return res.status(400).json({ msg: 'Comment text is required' });
+    }
+
     const newComment = new Comment({
       text,
-      user: req.user.id,
-      post: postId,
-      parentId: parentId || null, // For replies, parentId should be set
+      user: userId,  // Associate the comment with the logged-in user
+      post: req.params.postId,
+      parent: parentId || null,
     });
 
-    const comment = await newComment.save();
-    res.json(comment);
+    const savedComment = await newComment.save();
+    res.json(savedComment);
   } catch (err) {
-    console.error(err.message);
+    console.error('Error creating comment:', err);
     res.status(500).send('Server error');
   }
 });
+
 
 // GET comments for a post
 router.get('/:postId', async (req, res) => {

@@ -24,7 +24,6 @@
 const jwt = require('jsonwebtoken');
 
 module.exports = function (req, res, next) {
-  // Get the token from the header
   const token = req.header('Authorization')?.replace('Bearer ', '');
 
   if (!token) {
@@ -32,12 +31,15 @@ module.exports = function (req, res, next) {
   }
 
   try {
-    // Verify the token and extract the payload
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    // Attach the decoded user (with the ID) to req.user
     req.user = decoded.user;
+
+    // Log the extracted user from the token
+    console.log('Authenticated user:', req.user);
+
     next();
   } catch (err) {
     res.status(401).json({ msg: 'Token is not valid' });
   }
 };
+

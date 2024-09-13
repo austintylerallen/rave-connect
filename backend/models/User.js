@@ -7,8 +7,14 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   bio: { type: String },
   favoriteGenres: { type: [String] },
-  profilePicture: { type: String }, // Ensure profilePicture is included here
-  coverPhoto: { type: String },     // Ensure coverPhoto is included here
+  profilePicture: { 
+    type: String,
+    default: '/profile-photo-placeholder.jpg',  // Provide default image path here
+  },
+  coverPhoto: { 
+    type: String,
+    default: '/placeholder-cover-photo.jpg',  // Optionally provide a default cover photo
+  },
   followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   resetPasswordToken: { type: String },

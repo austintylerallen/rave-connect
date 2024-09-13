@@ -5,9 +5,28 @@ const Post = ({ post, handleEdit, handleDelete, handleLike }) => {
   const [replyContent, setReplyContent] = useState('');
   const [activeReplyBox, setActiveReplyBox] = useState(null);
   const [comments, setComments] = useState([]);
-  const [error, setError] = useState(null);
   const [isImageEnlarged, setIsImageEnlarged] = useState(false);
-  const [showHoverText, setShowHoverText] = useState(true);
+  const [postUser, setPostUser] = useState(null); // State for storing the user who created the post
+
+  useEffect(() => {
+    // Fetch post creator's user profile
+    if (post.user && post.user._id) {
+      const fetchUserProfile = async () => {
+        try {
+          const token = localStorage.getItem('token'); // Get the token from localStorage
+          const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/users/${post.user._id}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          setPostUser(response.data); // Set the fetched user data in state
+        } catch (err) {
+          console.error('Error fetching post user profile:', err);
+        }
+      };
+      fetchUserProfile();
+    }
+  }, [post.user]);
 
   useEffect(() => {
     const fetchComments = async () => {
@@ -49,13 +68,8 @@ const Post = ({ post, handleEdit, handleDelete, handleLike }) => {
     }
   };
 
-  const toggleReplyBox = (commentId) => {
-    setActiveReplyBox((prevId) => (prevId === commentId ? null : commentId));
-  };
-
   const toggleImageEnlarge = () => {
     setIsImageEnlarged(!isImageEnlarged);
-    setShowHoverText(false);
   };
 
   return (
@@ -64,13 +78,13 @@ const Post = ({ post, handleEdit, handleDelete, handleLike }) => {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center">
           <img
-            src={post.user?.profilePicture || '/default-avatar.png'}
+            src={postUser?.profilePicture || '/default-avatar.png'} // Use post user profile picture
             alt="User avatar"
             className="w-10 h-10 rounded-full mr-3"
           />
           <div>
             <p className="text-purple font-semibold">
-              {post.user?.username || 'Anonymous'}
+              {postUser?.username || 'Anonymous'} {/* Use post user profile username */}
             </p>
             <p className="text-gray-300 text-sm">
               {new Date(post.date).toLocaleString()}
@@ -96,26 +110,18 @@ const Post = ({ post, handleEdit, handleDelete, handleLike }) => {
       {/* Post Content */}
       <p className="text-gray-100 mb-4">{post.text}</p>
 
-      {/* Image Display with Hover Effect */}
+      {/* Image Display */}
       {post.imageUrl && (
-        <div
-          className={`relative mb-4 cursor-pointer mx-auto ${isImageEnlarged ? 'w-full' : 'w-48 h-64'}`}
-          onClick={toggleImageEnlarge}
-        >
+        <div className={`relative mb-4 cursor-pointer mx-auto ${isImageEnlarged ? 'w-full' : 'w-48 h-64'}`} onClick={toggleImageEnlarge}>
           <img
             src={post.imageUrl}
             alt="Uploaded"
             className={`object-cover rounded-lg mx-auto ${isImageEnlarged ? 'w-full h-auto' : 'w-48 h-64'}`}
           />
-          {showHoverText && (
-            <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-0 hover:opacity-80 rounded-lg transition-opacity duration-300 flex justify-center items-center">
-              <p className="text-white font-semibold">Click to Enlarge</p>
-            </div>
-          )}
         </div>
       )}
 
-      {/* Centered Event Display if available */}
+      {/* Event Display if available */}
       {post.eventName && (
         <div className="flex justify-center mb-4">
           <div className="bg-darkPurple p-4 rounded-lg flex flex-col items-center text-center">
@@ -140,7 +146,7 @@ const Post = ({ post, handleEdit, handleDelete, handleLike }) => {
           Like
         </button>
         <button
-          onClick={() => toggleReplyBox(post._id)}
+          onClick={() => setActiveReplyBox(post._id)}
           className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
         >
           Reply
@@ -155,7 +161,6 @@ const Post = ({ post, handleEdit, handleDelete, handleLike }) => {
             onChange={(e) => setReplyContent(e.target.value)}
             placeholder="Write a reply..."
             className="w-full p-3 border border-gray-300 rounded-lg text-gray-900 bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            style={{ color: '#333' }}
           />
           <button
             onClick={() => handleReply(null)}
@@ -170,34 +175,22 @@ const Post = ({ post, handleEdit, handleDelete, handleLike }) => {
       <div className="comments-section mt-6">
         {comments.map((comment) => (
           <div key={comment._id} className="bg-gray-100 p-3 my-2 rounded-lg ml-4">
-            <p className="text-gray-900">
-              <strong>{comment.user?.username || 'Anonymous'}:</strong> {comment.text}
-            </p>
+            <div className="flex items-center mb-2">
+              <img
+                src={comment.user?.profilePicture || '/default-avatar.png'} // Use comment user profile picture
+                alt="User avatar"
+                className="w-8 h-8 rounded-full mr-2"
+              />
+              <p className="text-gray-900">
+                <strong>{comment.user?.username || 'Anonymous'}:</strong> {comment.text}
+              </p>
+            </div>
             <button
-              onClick={() => toggleReplyBox(comment._id)}
+              onClick={() => setActiveReplyBox(comment._id)}
               className="text-sm text-blue-500 mt-1"
             >
               Reply
             </button>
-
-            {/* Nested reply box */}
-            {activeReplyBox === comment._id && (
-              <div className="comment-form mt-4">
-                <textarea
-                  value={replyContent}
-                  onChange={(e) => setReplyContent(e.target.value)}
-                  placeholder="Write a reply..."
-                  className="w-full p-3 border border-gray-300 rounded-lg text-gray-900 bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  style={{ color: '#333' }}
-                />
-                <button
-                  onClick={() => handleReply(comment._id)}
-                  className="mt-2 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
-                >
-                  Submit Reply
-                </button>
-              </div>
-            )}
           </div>
         ))}
       </div>

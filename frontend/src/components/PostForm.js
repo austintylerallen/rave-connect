@@ -1,5 +1,6 @@
 import React from 'react';
-import { FaPaperPlane, FaImage, FaCalendarAlt } from 'react-icons/fa'; // Import the icons
+import { FaPaperPlane, FaImage, FaCalendarAlt } from 'react-icons/fa';
+import axios from 'axios';
 
 const PostForm = ({
   content,
@@ -7,22 +8,23 @@ const PostForm = ({
   image,
   setImage,
   selectedEvent,
-  handleSubmit,
-  editingPostId,
-  handleCancelEdit,
+  handleSubmit, // Ensure this is passed from the parent
   handleOpenModal,
 }) => {
-  const handleImageUpload = (e) => {
-    setImage(e.target.files[0]);
+
+  // Define the form submit handler
+  const handleFormSubmit = async (e) => {
+    e.preventDefault(); // Prevent the form from submitting normally
+    handleSubmit(e); // Pass the event object to the handleSubmit function passed from the parent
   };
 
-  const handleFormSubmit = (e) => {
-    e.preventDefault();
-    handleSubmit(e);
+  const handleImageUpload = (e) => {
+    setImage(e.target.files[0]); // Handle image upload
   };
 
   return (
     <form onSubmit={handleFormSubmit} className="mb-8">
+      {/* Form content */}
       <div className="flex">
         <textarea
           className="flex-1 p-4 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
@@ -45,9 +47,8 @@ const PostForm = ({
         )}
       </div>
 
-      {/* Buttons in one line */}
+      {/* Buttons */}
       <div className="flex items-center mt-4">
-        {/* Custom file input button with image icon */}
         <label
           htmlFor="image-upload"
           className="cursor-pointer bg-darkPurple text-white rounded-full px-4 py-2 hover:bg-purple-600 transition-colors flex items-center"
@@ -66,20 +67,15 @@ const PostForm = ({
           </p>
         )}
 
-        {/* Event button with calendar icon only */}
         <button
           type="button"
           className="ml-4 px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors flex items-center"
           onClick={handleOpenModal}
         >
-          <FaCalendarAlt /> {/* Only icon for event */}
+          <FaCalendarAlt />
         </button>
 
-        {/* Send button with icon only */}
-        <button
-          type="submit"
-          className="ml-auto px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors flex items-center"
-        >
+        <button type="submit" className="ml-auto px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors flex items-center">
           <FaPaperPlane />
         </button>
       </div>

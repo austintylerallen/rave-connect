@@ -2,13 +2,15 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-// Helper function to generate a JWT token
+// Helper function to generate a JWT token with profile information
 const generateToken = (user) => {
   return jwt.sign(
     {
       user: {
-        id: user._id,  // Include user ID in the JWT payload
+        id: user._id, // Include user ID in the JWT payload
         email: user.email, // Optionally include the email
+        username: user.username, // Include the username
+        profilePicture: user.profilePicture, // Include the profile picture
       },
     },
     process.env.JWT_SECRET,
@@ -31,11 +33,12 @@ exports.register = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Create the new user object
+    // Create the new user object with default profile picture if necessary
     user = new User({
       username,
       email,
       password: hashedPassword, // Save the hashed password
+      profilePicture: '/profile-photo-placeholder.jpg', // Default profile picture
     });
 
     // Save the new user to the database
@@ -67,7 +70,7 @@ exports.login = async (req, res) => {
       return res.status(400).json({ msg: 'Invalid credentials' });
     }
 
-    // Generate the token and return it
+    // Generate the token and return it with profile information
     const token = generateToken(user);
     res.json({ token }); // Send token to the client
   } catch (err) {
