@@ -181,21 +181,36 @@ const Timeline = () => {
   // Handle like/unlike functionality
   const handleLike = async (postId) => {
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('You must be logged in to perform this action.');
+        return;
+      }
+  
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/api/posts/${postId}/like`,
         {},
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
-      setPosts(posts.map((post) => (post._id === postId ? response.data : post)));
+  
+      // After liking the post, fetch the updated post with the populated user
+      const updatedPost = await axios.get(`${process.env.REACT_APP_API_URL}/api/posts/${postId}`);
+  
+      setPosts((prevPosts) =>
+        prevPosts.map((post) => (post._id === postId ? updatedPost.data : post))
+      );
     } catch (error) {
       console.error('Error liking post:', error);
       setError(error.response?.data?.msg || 'Failed to like post. Please try again.');
     }
   };
+  
+  
+  
 
   return (
     <div

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 const LandingPage = () => {
   return (
-    <div className="flex items-center justify-center h-screen bg-darkTeal text-white">
+    <div className="flex items-center justify-center h-screen text-white">
       <div className="text-center">
         <h1 className="text-4xl font-bold mb-6">Welcome to Rave Connect</h1>
         <p className="mb-8">Please log in or register to continue</p>

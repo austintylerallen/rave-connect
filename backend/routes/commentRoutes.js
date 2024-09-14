@@ -5,6 +5,8 @@ const Comment = require('../models/Comment');
 
 
 // Create a comment
+// In commentRoutes.js or wherever you're handling the comment routes
+
 router.post('/:postId', auth, async (req, res) => {
   const { text, parentId } = req.body;
 
@@ -22,13 +24,19 @@ router.post('/:postId', auth, async (req, res) => {
       parent: parentId || null,
     });
 
-    const savedComment = await newComment.save();
-    res.json(savedComment);
+    // Save the new comment
+    let savedComment = await newComment.save();
+
+    // Populate the user data on the comment before sending the response
+    savedComment = await savedComment.populate('user', 'username profilePicture').execPopulate();
+
+    res.json(savedComment);  // Return the populated comment
   } catch (err) {
     console.error('Error creating comment:', err);
     res.status(500).send('Server error');
   }
 });
+
 
 
 // GET comments for a post

@@ -228,17 +228,34 @@ router.post('/', auth, upload.single('image'), async (req, res) => {
 // Get all posts
 router.get('/', async (req, res) => {
   try {
-    // Fetch posts and populate user data
     const posts = await Post.find()
-      .sort({ date: -1 })
-      .populate('user', 'username profilePicture'); // Ensure user is populated with these fields
-    
+      .sort({ date: -1 }) // Sort by date
+      .populate('user', 'username profilePicture') // Populate the user data for each post
+      .populate('likes.user', 'username profilePicture') // Populate users in likes
+      .populate('comments.user', 'username profilePicture'); // Populate users in comments
+
     res.json(posts);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server error');
   }
 });
+
+// Get a specific post
+router.get('/:id', async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id).populate('user', 'username profilePicture');
+    if (!post) {
+      return res.status(404).json({ msg: 'Post not found' });
+    }
+    res.json(post);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
+});
+
+
 
 // Update a post
 router.put('/:id', auth, async (req, res) => {
@@ -286,7 +303,6 @@ router.delete('/:id', auth, async (req, res) => {
   }
 });
 
-// Like/Unlike a post
 router.post('/:id/like', auth, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -307,11 +323,20 @@ router.post('/:id/like', auth, async (req, res) => {
     }
 
     await post.save();
-    return res.json(post);
+
+    // Populate the user information after save
+    const updatedPost = await Post.findById(req.params.id).populate('user', 'username profilePicture');
+    
+    return res.json(updatedPost);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server error');
   }
 });
+
+
+
+
+
 
 module.exports = router;

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
-const TimelinePost = require('./../models/TimelinePost');
-const User = require('./../models/User'); // Assuming you have a User model
+const Post = require('./../models/Post');
+const User = require('./../models/User');
 
 // Load environment variables
 dotenv.config();
@@ -10,69 +10,104 @@ dotenv.config();
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(async () => {
     console.log('MongoDB connected');
-    await seedTimeline();
+    await seedData();
     mongoose.connection.close(); // Close connection when done
   })
   .catch((err) => {
     console.error('Error connecting to MongoDB:', err);
   });
 
-// Sample timeline seed data
-const seedData = async () => {
-  // Fetch a valid user from the database to associate with the posts
-  const user = await User.findOne(); // Assuming there's at least one user in the database
+// Helper function to create users if needed
+const createUsers = async () => {
+  const existingUsers = await User.find();
 
-  if (!user) {
-    console.error('No user found in the database. Cannot proceed with seeding.');
-    process.exit(1); // Exit if no user is found
+  // If there are fewer than 2 users, create new ones
+  if (existingUsers.length < 2) {
+    const user1 = new User({
+      username: 'RaveMaster',
+      email: 'ravemaster@example.com',
+      password: 'hashedpassword1', // Replace with properly hashed passwords
+    });
+
+    const user2 = new User({
+      username: 'TechnoKing',
+      email: 'technoking@example.com',
+      password: 'hashedpassword2', // Replace with properly hashed passwords
+    });
+
+    await user1.save();
+    await user2.save();
+
+    return [user1, user2];
   }
 
+  // If enough users already exist, return the first two
+  return [existingUsers[0], existingUsers[1]];
+};
+
+// Function to prepare seed data for posts
+const seedPosts = async (users) => {
   return [
     {
-      user: user._id, // Reference the user's ID
-      text: "Can't wait for EDC Las Vegas next month!",
-      content: "Is anyone else going to EDC Las Vegas? I'm so hyped for the lineup! 💜 My rave fam and I are ready to dance for three days straight under the neon sky. I’m especially excited for Fisher’s set. Anyone planning on camping there or getting a hotel?",
+      user: users[0]._id, // Reference user1's ID
+      text: "Excited for the underground rave this weekend!",
+      content: "I can't wait to dance all night to deep house and techno vibes. Who else is going?",
       comments: [
         {
-          user: user._id, // Reference the user's ID in comments
-          text: "Camping all the way! Nothing beats waking up right there in the middle of the action."
+          user: users[1]._id, // Reference user2's ID in comment
+          text: "I’m definitely going! Let’s link up and enjoy the beats!"
         },
         {
-          user: user._id,
-          text: "Hotel for me, I need a real bed after hours of raving lol. Are you going for the after-parties?"
+          user: users[0]._id,
+          text: "Sounds good! I’ll bring the glow sticks."
         }
       ]
     },
     {
-      user: user._id,
-      text: "New Techno Track Release",
-      content: "Just dropped my latest techno track ‘Eclipse’. Spent months perfecting the deep bass and melodic transitions. Would love for you all to check it out! Available now on all platforms. What do you guys think?",
+      user: users[1]._id,
+      text: "Just released my latest techno mix!",
+      content: "It’s 90 minutes of dark, hypnotic techno. Let me know what you think, and drop a like!",
       comments: [
         {
-          user: user._id,
-          text: "Bro, the transition at 2:15 is sick! That buildup gave me chills. 👌"
+          user: users[0]._id,
+          text: "Bro, that mix was fire! Track 3 was a banger."
         },
         {
-          user: user._id,
-          text: "Perfect track for my workout playlist. Keep up the great work!"
+          user: users[1]._id,
+          text: "Glad you liked it! That track is one of my favorites."
         }
       ]
     }
   ];
 };
 
-// Function to seed the timeline
-async function seedTimeline() {
+// Function to insert posts into the database
+const insertPosts = async (posts) => {
   try {
-    // Remove existing data if needed
-    await TimelinePost.deleteMany({});
-    console.log('Existing timeline posts removed.');
+    // Remove existing posts if necessary
+    await Post.deleteMany({});
+    console.log('Existing posts removed.');
 
-    // Insert seed data
-    const data = await seedData(); // Fetch seed data with user ID
-    await TimelinePost.insertMany(data);
-    console.log('Timeline seeded successfully.');
+    // Insert seed data into the 'posts' collection
+    await Post.insertMany(posts);
+    console.log('Posts seeded successfully.');
   } catch (err) {
-    console.error('Error seeding timeline:', err);
+    console.error('Error seeding posts:', err);
+  }
+};
+
+// Function to seed the posts collection
+async function seedData() {
+  try {
+    // Get or create users
+    const users = await createUsers();
+
+    // Get post data to seed
+    const posts = await seedPosts(users);
+
+    // Insert the posts into the database
+    await insertPosts(posts);
+  } catch (err) {
+    console.error('Error in seedData function:', err);
   }
 }
