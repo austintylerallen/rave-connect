@@ -39,11 +39,6 @@ mongoose.connect(process.env.MONGODB_URI, {
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB connection error:', err.message));
 
-// Root route to handle "Cannot GET /" error
-app.get('/', (req, res) => {
-  res.send('Welcome to the backend API');
-});
-
 // Set up API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -54,8 +49,10 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/cloudinary', cloudinaryRoutes);
 
-// Optional: Serve static files (for a frontend like React)
-app.use(express.static(path.join(__dirname, 'frontend/build')));
+// Serve static files from the React app (assuming it's in the "frontend/build" directory)
+app.use(express.static(path.join(__dirname, 'frontend', 'build')));
+
+// Catch-all route to handle any unmatched routes and send the index.html file for the frontend
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'frontend', 'build', 'index.html'));
 });
