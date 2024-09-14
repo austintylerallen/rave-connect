@@ -82,5 +82,12 @@ io.on('connection', (socket) => {
   });
 });
 
+// Ensure the app listens on the PORT provided by the environment
 const PORT = process.env.PORT || 5002;
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT, (err) => {
+  if (err) {
+    console.error('Server failed to start:', err);
+  } else {
+    console.log(`Server running on port ${PORT}`);
+  }
+});
