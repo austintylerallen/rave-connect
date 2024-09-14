@@ -5,6 +5,7 @@ const dotenv = require('dotenv');
 const http = require('http');
 const { Server } = require('socket.io');
 const cron = require('node-cron');
+const path = require('path');
 const Event = require('./models/Event');
 const cloudinaryRoutes = require('./routes/cloudinaryRoutes'); // Adjust the path as needed
 
@@ -38,15 +39,26 @@ mongoose.connect(process.env.MONGODB_URI, {
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB connection error:', err.message));
 
-// Set up routes
+// Root route to handle "Cannot GET /" error
+app.get('/', (req, res) => {
+  res.send('Welcome to the backend API');
+});
+
+// Set up API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/spotify', spotifyRoutes);
 app.use('/api/notifications', notificationRoutes);
-app.use('/api/comments', commentRoutes); // Ensure this line exists
+app.use('/api/comments', commentRoutes);
 app.use('/api/cloudinary', cloudinaryRoutes);
+
+// Optional: Serve static files (for a frontend like React)
+app.use(express.static(path.join(__dirname, 'frontend/build')));
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'frontend', 'build', 'index.html'));
+});
 
 // Cron job to delete events 12 hours after they end
 cron.schedule('0 * * * *', async () => {
