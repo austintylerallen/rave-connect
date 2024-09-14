@@ -49,13 +49,12 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/cloudinary', cloudinaryRoutes);
 
-// Serve static files from the React app (assuming it's in the "frontend/build" directory)
-app.use(express.static(path.join(__dirname, 'frontend', 'build')));
+app.use(express.static(path.join(__dirname, '..', 'frontend', 'build')));
 
-// Catch-all route to handle any unmatched routes and send the index.html file for the frontend
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'frontend', 'build', 'index.html'));
+  res.sendFile(path.join(__dirname, '..', 'frontend', 'build', 'index.html'));
 });
+
 
 // Cron job to delete events 12 hours after they end
 cron.schedule('0 * * * *', async () => {
