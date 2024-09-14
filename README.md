@@ -119,7 +119,7 @@ API Endpoints
 Contributing
 ------------
 
-Feel free to fork the repository, submit a pull request, or report any issues in the [issues section ](https://github.com/your-username/rave-connect/issues).
+Feel free to fork the repository, submit a pull request, or report any issues in the [issues section ](https://github.com/austintylerallen/rave-connect/issues).
 
 License
 -------
