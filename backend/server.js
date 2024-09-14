@@ -30,7 +30,21 @@ const io = new Server(server, {
 });
 
 app.use(express.json());
-app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    const allowedOrigins = ['http://localhost:3000', 'https://rave-connect.onrender.com'];
+    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+};
+
+app.use(cors(corsOptions));
 
 mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
@@ -49,12 +63,17 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/cloudinary', cloudinaryRoutes);
 
-app.use(express.static(path.join(__dirname, '..', 'frontend', 'build')));
-
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'frontend', 'build', 'index.html'));
-});
-
+// Serve static files from the React app (if applicable)
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../frontend/build')));
+  app.get('*', (req, res) =>
+    res.sendFile(path.resolve(__dirname, '..', 'frontend', 'build', 'index.html'))
+  );
+} else {
+  app.get('/', (req, res) => {
+    res.send('API Running');
+  });
+}
 
 // Cron job to delete events 12 hours after they end
 cron.schedule('0 * * * *', async () => {
@@ -76,8 +95,6 @@ io.on('connection', (socket) => {
   });
 
   socket.on('sendNotification', (data) => {
-    console.log('Received notification data:', data);
-
     io.to(data.userId).emit('notification', {
       message: data.message,
       type: data.type,
