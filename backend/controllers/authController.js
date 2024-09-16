@@ -19,6 +19,7 @@ const generateToken = (user) => {
 };
 
 // Registration
+// Registration Controller
 exports.register = async (req, res) => {
   const { username, email, password } = req.body;
 
@@ -33,25 +34,27 @@ exports.register = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Create the new user object with default profile picture if necessary
+    // Create the new user
     user = new User({
       username,
       email,
-      password: hashedPassword, // Save the hashed password
-      profilePicture: '/profile-photo-placeholder.jpg', // Default profile picture
+      password: hashedPassword,
     });
 
-    // Save the new user to the database
     await user.save();
 
-    // Generate the token and return it
-    const token = generateToken(user);
-    res.json({ token }); // Send token to the client
+    // Generate a token after successful registration
+    const token = generateToken(user);  // Call your generateToken function to create the JWT
+
+    // Return the token in the response
+    res.status(201).json({ msg: 'User registered successfully', token });  // Send the token along with the message
   } catch (err) {
     console.error('Error in registration:', err.message);
     res.status(500).send('Server error');
   }
 };
+
+
 
 // Login
 exports.login = async (req, res) => {
@@ -64,20 +67,30 @@ exports.login = async (req, res) => {
       return res.status(400).json({ msg: 'Invalid credentials' });
     }
 
-    // Check if the provided password matches the stored hashed password
+    // Log the passwords being compared
+    console.log('Plain-text password:', password);  // The password entered by the user
+    console.log('Hashed password from DB:', user.password);  // The hashed password from the database
+
+    // Compare the plain-text password with the hashed password
     const isMatch = await bcrypt.compare(password, user.password);
+
+    // Log the result of the comparison
+    console.log('Password match result:', isMatch);
+
     if (!isMatch) {
-      return res.status(400).json({ msg: 'Invalid credentials' });
+      return res.status(400).json({ msg: 'Invalid credentials (password mismatch)' });
     }
 
-    // Generate the token and return it with profile information
+    // Generate token on successful login
     const token = generateToken(user);
-    res.json({ token }); // Send token to the client
+    res.json({ token });
   } catch (err) {
-    console.error('Error in login:', err.message);
+    console.error('Login error:', err.message);
     res.status(500).send('Server error');
   }
 };
+
+
 
 // Get user data (requires token)
 exports.getUser = async (req, res) => {

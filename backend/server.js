@@ -53,6 +53,25 @@ mongoose.connect(process.env.MONGODB_URI, {
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB connection error:', err.message));
 
+// Optional: listen for MongoDB connection events
+mongoose.connection.on('connected', () => {
+  console.log('Mongoose connected to DB');
+});
+mongoose.connection.on('error', (err) => {
+  console.error('Mongoose connection error:', err.message);
+});
+mongoose.connection.on('disconnected', () => {
+  console.log('Mongoose disconnected from DB');
+});
+
+// Graceful shutdown for the connection
+process.on('SIGINT', async () => {
+  await mongoose.connection.close();
+  console.log('Mongoose connection closed due to app termination');
+  process.exit(0);
+});
+
+
 // Set up API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);

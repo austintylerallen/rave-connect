@@ -4,6 +4,8 @@ const { register, login, getUser } = require('../controllers/authController');
 const auth = require('../middleware/auth');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
+const bcrypt = require('bcryptjs'); // Make sure bcrypt is imported
+const User = require('../models/User'); // Import the User model
 
 // Existing Routes
 router.post('/register', register);
@@ -23,9 +25,11 @@ router.post('/forgot-password', async (req, res) => {
 
     // Create reset token and expiration
     const resetToken = crypto.randomBytes(32).toString('hex');
+    const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex'); // Hash the token
     const resetTokenExpires = Date.now() + 3600000; // 1 hour
 
-    user.resetPasswordToken = resetToken;
+    // Store hashed token in database
+    user.resetPasswordToken = hashedToken;
     user.resetPasswordExpires = resetTokenExpires;
     await user.save();
 
@@ -38,6 +42,7 @@ router.post('/forgot-password', async (req, res) => {
       },
     });
 
+    // Send plain reset token to email
     const resetUrl = `http://localhost:3000/reset-password/${resetToken}`;
 
     const mailOptions = {
@@ -66,17 +71,23 @@ router.post('/reset-password/:token', async (req, res) => {
   const { password } = req.body;
 
   try {
+    // Hash the token to compare with stored hashed token
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+    
     const user = await User.findOne({
-      resetPasswordToken: token,
-      resetPasswordExpires: { $gt: Date.now() },
+      resetPasswordToken: hashedToken,
+      resetPasswordExpires: { $gt: Date.now() }, // Ensure the token hasn't expired
     });
 
     if (!user) {
       return res.status(400).json({ msg: 'Invalid or expired token' });
     }
 
+    // Hash the new password before saving it
     const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(password, salt); // Hash the new password
+    user.password = await bcrypt.hash(password, salt);
+    
+    // Clear the reset token and expiration
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
 

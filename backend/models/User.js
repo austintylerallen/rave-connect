@@ -1,5 +1,6 @@
+// models/User.js
+
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
@@ -9,11 +10,11 @@ const userSchema = new mongoose.Schema({
   favoriteGenres: { type: [String] },
   profilePicture: { 
     type: String,
-    default: '/profile-photo-placeholder.jpg',  // Provide default image path here
+    default: '/profile-photo-placeholder.jpg',
   },
   coverPhoto: { 
     type: String,
-    default: '/placeholder-cover-photo.jpg',  // Optionally provide a default cover photo
+    default: '/placeholder-cover-photo.jpg',
   },
   followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
@@ -21,12 +22,7 @@ const userSchema = new mongoose.Schema({
   resetPasswordExpires: { type: Date },
 });
 
-// Middleware to hash the password before saving
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
-  this.password = await bcrypt.hash(this.password, 10);
-  next();
-});
-
+// Remove the `pre('save')` hook for password hashing
+// Since you're already hashing the password in the registration controller
 const User = mongoose.model('User', userSchema);
 module.exports = User;
