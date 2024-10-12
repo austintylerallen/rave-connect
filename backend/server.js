@@ -23,7 +23,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL,
+    origin: ['http://localhost:3000', 'http://localhost:3001', 'https://rave-connect.onrender.com'],
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -31,20 +31,35 @@ const io = new Server(server, {
 
 app.use(express.json());
 
+const allowedOrigins = ['http://localhost:3000', 'http://localhost:3001', 'https://rave-connect.onrender.com'];
+
 const corsOptions = {
-  origin: function (origin, callback) {
-    const allowedOrigins = ['http://localhost:3000', 'https://rave-connect.onrender.com'];
-    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
-      callback(null, true);
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true); // Allow requests with allowed origin
     } else {
-      callback(new Error('Not allowed by CORS'));
+      callback(new Error('Not allowed by CORS')); // Block others
     }
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
 app.use(cors(corsOptions));
+
+// Handle preflight requests explicitly
+app.options('*', cors(corsOptions));
+
+
+
+// Explicitly handle preflight OPTIONS requests for CORS
+app.options('*', (req, res) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin);
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.sendStatus(200); // Make sure to return success for OPTIONS requests
+});
 
 mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
@@ -70,7 +85,6 @@ process.on('SIGINT', async () => {
   console.log('Mongoose connection closed due to app termination');
   process.exit(0);
 });
-
 
 // Set up API routes
 app.use('/api/auth', authRoutes);
